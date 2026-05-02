@@ -1,6 +1,6 @@
-jam,menit,detik,audio
-06,52,00,audio/36.mp3
-07,10,00,audio/36.mp3
-09,30,00,audio/istirahat.mp3
-10,00,30,audio/bel_kembali.mp3
-12,00,00,audio/pulang.mp3
+jam,menit,detik,audio,keterangan
+06,59,00,audio/36.mp3,coba
+07,10,00,audio/36.mp3,yasinan
+09,30,00,audio/istirahat.mp3,jam ke-1
+10,00,30,audio/bel_kembali.mp3,istirahat
+12,00,00,audio/pulang.mp3,pulang
