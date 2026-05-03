@@ -11,7 +11,7 @@ updateClock();
 // -------------------- LOAD JADWAL --------------------
 async function loadSchedule() {
   // Ganti URL sesuai repo GitHub kamu
-  const response = await fetch("https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/jadwal.csv");
+  const response = await fetch("https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/jadwal.csv.csv");
   const text = await response.text();
   const rows = text.trim().split("\n").slice(1); // skip header
   return rows.map(row => {
@@ -20,7 +20,7 @@ async function loadSchedule() {
       jam: parseInt(jam),
       menit: parseInt(menit),
       detik: parseInt(detik),
-      audio: audio,
+      audio: audio.trim(),
       keterangan: keterangan
     };
   }).sort((a, b) =>
@@ -29,20 +29,25 @@ async function loadSchedule() {
   );
 }
 
-// -------------------- TAMPILKAN JADWAL --------------------
+// -------------------- PLAY AUDIO --------------------
 function playAudio(src) {
   const bell = document.getElementById("bell");
   bell.src = src;
-  bell.play();
+  bell.hidden = false;   // pastikan tidak tersembunyi
+  bell.play().catch(err => {
+    console.error("Gagal memutar audio:", err);
+    alert("Audio tidak bisa diputar. Periksa path/URL file.");
+  });
 }
 
+// -------------------- TAMPILKAN JADWAL --------------------
 function renderSchedule(schedule) {
   const tbody = document.getElementById("scheduleTable");
   tbody.innerHTML = "";
   const now = new Date();
   const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-  schedule.forEach(item => {
+  schedule.forEach((item, idx) => {
     const itemSec = item.jam * 3600 + item.menit * 60 + item.detik;
     let status;
     if (itemSec < currentSec) {
