@@ -11,7 +11,7 @@ updateClock();
 // -------------------- LOAD JADWAL --------------------
 async function loadSchedule() {
   // Ganti URL sesuai repo GitHub kamu
-  const response = await fetch("https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/jadwal.csv.csv");
+  const response = await fetch("https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/jadwal.csv");
   const text = await response.text();
   const rows = text.trim().split("\n").slice(1); // skip header
   return rows.map(row => {
