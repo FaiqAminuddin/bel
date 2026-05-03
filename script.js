@@ -133,5 +133,74 @@ function downloadAudio(file) {
   a.click();
 }
 
+function setStatus(message) {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  const waktu = new Intl.DateTimeFormat('id-ID', options).format(now) + " WIB";
+  document.getElementById("status").textContent = `${message} pada ${waktu}`;
+}
+
+// -------------------- SYNC JADWAL --------------------
+async function syncSchedule() {
+  try {
+    await fetchScheduleOnline();
+    setStatus("Jadwal berhasil disinkron");
+  } catch (err) {
+    alert("Gagal sync jadwal: " + err);
+  }
+}
+
+// -------------------- UNDUH JADWAL --------------------
+function downloadSchedule() {
+  const text = localStorage.getItem("jadwal.csv");
+  if (!text) {
+    alert("Belum ada jadwal tersimpan. Lakukan Sync dulu.");
+    return;
+  }
+  const blob = new Blob([text], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "jadwal.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus("Jadwal berhasil diunduh");
+}
+
+// -------------------- SYNC AUDIO --------------------
+async function syncAudio() {
+  try {
+    for (const file of AUDIO_FILES) {
+      const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.onload = () => {
+        localStorage.setItem(file, reader.result);
+      };
+      reader.readAsDataURL(blob);
+    }
+    setStatus("Audio berhasil disinkron");
+  } catch (err) {
+    alert("Gagal sync audio: " + err);
+  }
+}
+
+// -------------------- UNDUH SEMUA AUDIO --------------------
+async function downloadAllAudio() {
+  const zip = new JSZip();
+  for (const file of AUDIO_FILES) {
+    const data = localStorage.getItem(file);
+    if (data) {
+      const base64 = data.split(",")[1];
+      zip.file(file.split("/").pop(), base64, { base64: true });
+    }
+  }
+  const content = await zip.generateAsync({ type: "blob" });
+  saveAs(content, "audio_bel.zip");
+  setStatus("Semua audio berhasil diunduh");
+}
+
+
 
 checkBell();
