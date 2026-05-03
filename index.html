@@ -2,33 +2,43 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Bel MTs ITB Online</title>
+  <title>Bel Sekolah Online</title>
+  <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
     #clock { font-size: 48px; margin-bottom: 20px; }
+    table { border-collapse: collapse; margin:auto; }
+    th, td { border:1px solid #ccc; padding:8px; }
   </style>
 </head>
 <body>
-  <h1>Sekarang Jam:</h1>
+  <h1>Jam WIB Terkini</h1>
   <div id="clock"></div>
-  <audio id="bell" controls hidden></audio>
-  
+
   <h2>Jadwal Bel</h2>
-<table border="1" style="margin:auto;">
-  <thead>
-    <tr>
-      <th>Waktu</th>
-      <th>Keterangan</th>
-      <th>Status</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody id="scheduleTable"></tbody>
-</table>
+  <button onclick="syncSchedule()">Sync Jadwal</button>
+  <button onclick="downloadSchedule()">Unduh Jadwal</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Waktu</th>
+        <th>Keterangan</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="scheduleTable"></tbody>
+  </table>
 
-<audio id="bell" controls hidden></audio>
+  <audio id="bell" controls hidden></audio>
 
-  
-   <script src="script.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker terdaftar"))
+        .catch(err => console.error("SW gagal:", err));
+    }
+  </script>
 </body>
 </html>
