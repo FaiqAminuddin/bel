@@ -1,10 +1,10 @@
 // -------------------- KONFIG --------------------
 const JADWAL_URL = "https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/jadwal.csv";
 const AUDIO_FILES = [
-  "audio/bel_masuk.mp3",
-  "audio/istirahat.mp3",
-  "audio/bel_kembali.mp3",
-  "audio/pulang.mp3"
+  "audio/036.mp3",
+  "audio/055.mp3",
+  "audio/056.mp3",
+  "audio/067.mp3"
 ];
 
 // -------------------- JAM WIB --------------------
