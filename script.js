@@ -18,11 +18,20 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // -------------------- STATUS --------------------
-function setStatus(message) {
+function setStatusPerButton(type, message, success=true) {
   const now = new Date();
   const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
   const waktu = new Intl.DateTimeFormat('id-ID', options).format(now) + " WIB";
-  document.getElementById("status").textContent = `${message} pada ${waktu}`;
+
+  if (type === "jadwal") {
+    document.getElementById("statusJadwal").textContent = `${message} pada ${waktu}`;
+    document.getElementById("btnSyncJadwal").className = success ? "btn-green" : "btn-red";
+    document.getElementById("btnUnduhJadwal").className = success ? "btn-green" : "btn-red";
+  } else if (type === "audio") {
+    document.getElementById("statusAudio").textContent = `${message} pada ${waktu}`;
+    document.getElementById("btnSyncAudio").className = success ? "btn-green" : "btn-red";
+    document.getElementById("btnUnduhAudio").className = success ? "btn-green" : "btn-red";
+  }
 }
 
 // -------------------- JADWAL --------------------
@@ -30,7 +39,7 @@ async function fetchScheduleOnline() {
   const response = await fetch(JADWAL_URL);
   if (!response.ok) throw new Error("Gagal mengambil jadwal dari GitHub");
   const text = await response.text();
-  localStorage.setItem("jadwal.csv", text); // simpan ke browser
+  localStorage.setItem("jadwal.csv", text);
   return parseSchedule(text);
 }
 
@@ -45,10 +54,7 @@ function parseSchedule(text) {
       audio: audio.trim(),
       keterangan: keterangan
     };
-  }).sort((a, b) =>
-    (a.jam * 3600 + a.menit * 60 + a.detik) -
-    (b.jam * 3600 + b.menit * 60 + b.detik)
-  );
+  });
 }
 
 function loadScheduleOffline() {
@@ -56,7 +62,6 @@ function loadScheduleOffline() {
   if (!text) return [];
   return parseSchedule(text);
 }
-
 
 async function syncSchedule() {
   try {
@@ -84,13 +89,15 @@ function downloadSchedule() {
   URL.revokeObjectURL(url);
   setStatusPerButton("jadwal", "Jadwal berhasil diunduh");
 }
-// -------------------- AUDIO --------------------
 
+// -------------------- AUDIO --------------------
 async function syncAudio() {
   try {
     for (const file of AUDIO_FILES) {
       const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
+      console.log("Mengambil:", url); // debug
       const response = await fetch(url);
+      if (!response.ok) throw new Error("File tidak ditemukan: " + url);
       const blob = await response.blob();
       const reader = new FileReader();
       reader.onload = () => {
@@ -112,26 +119,36 @@ async function downloadAllAudio() {
     if (data) {
       const base64 = data.split(",")[1];
       zip.file(file.split("/").pop(), base64, { base64: true });
+    } else {
+      // fallback: ambil langsung dari GitHub
+      try {
+        const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
+        const response = await fetch(url);
+        const blob = await response.blob();
+        zip.file(file.split("/").pop(), blob);
+      } catch (err) {
+        console.error("Gagal ambil:", file, err);
+      }
     }
   }
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, "audio_bel.zip");
   setStatusPerButton("audio", "Semua audio berhasil diunduh");
 }
+
 // -------------------- PLAY --------------------
 function playAudio(src) {
   const bell = document.getElementById("bell");
-  // cek apakah audio ada di localStorage (offline)
   const data = localStorage.getItem(src);
   if (data) {
     bell.src = data;
   } else {
-    bell.src = src; // fallback online
+    bell.src = src;
   }
   bell.hidden = false;
   bell.play().catch(err => {
     console.error("Gagal memutar audio:", err);
-    alert("Audio tidak bisa diputar. Periksa path/URL file.");
+    alert("Audio tidak bisa diputar.");
   });
 }
 
@@ -167,18 +184,16 @@ function renderSchedule(schedule) {
 async function initSchedule() {
   let schedule = [];
   try {
-    schedule = await fetchScheduleOnline(); // coba online
-    setStatus("Jadwal berhasil dimuat online");
+    schedule = await fetchScheduleOnline();
+    setStatusPerButton("jadwal", "Jadwal berhasil dimuat online");
   } catch {
-    schedule = loadScheduleOffline();       // fallback offline
-    setStatus("Jadwal dimuat dari offline cache");
+    schedule = loadScheduleOffline();
+    setStatusPerButton("jadwal", "Jadwal dimuat dari offline cache");
   }
   renderSchedule(schedule);
 
-  // update tabel tiap 30 detik
   setInterval(() => renderSchedule(schedule), 30000);
 
-  // cek bel tiap detik
   setInterval(() => {
     const now = new Date();
     const h = now.getHours();
@@ -191,26 +206,5 @@ async function initSchedule() {
     });
   }, 1000);
 }
-
-function setStatusPerButton(type, message, success=true) {
-  const now = new Date();
-  const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
-  const waktu = new Intl.DateTimeFormat('id-ID', options).format(now) + " WIB";
-
-  if (type === "jadwal") {
-    document.getElementById("statusJadwal").textContent = `${message} pada ${waktu}`;
-    if (success) {
-      document.getElementById("btnSyncJadwal").style.backgroundColor = "#4CAF50"; // hijau
-      document.getElementById("btnUnduhJadwal").style.backgroundColor = "#4CAF50";
-    }
-  } else if (type === "audio") {
-    document.getElementById("statusAudio").textContent = `${message} pada ${waktu}`;
-    if (success) {
-      document.getElementById("btnSyncAudio").style.backgroundColor = "#4CAF50";
-      document.getElementById("btnUnduhAudio").style.backgroundColor = "#4CAF50";
-    }
-  }
-}
-
 
 initSchedule();
