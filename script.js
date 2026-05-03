@@ -52,7 +52,8 @@ function parseSchedule(text) {
       menit: parseInt(menit),
       detik: parseInt(detik),
       audio: audio.trim(),
-      keterangan: keterangan
+      keterangan: keterangan,
+      enabled: true // default aktif
     };
   });
 }
@@ -120,7 +121,6 @@ async function downloadAllAudio() {
       const base64 = data.split(",")[1];
       zip.file(file.split("/").pop(), base64, { base64: true });
     } else {
-      // fallback: ambil langsung dari GitHub
       try {
         const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
         const response = await fetch(url);
@@ -152,14 +152,24 @@ function playAudio(src) {
   });
 }
 
+// -------------------- TOGGLE JADWAL --------------------
+function toggleSchedule(index) {
+  const schedule = window.currentSchedule || [];
+  if (schedule[index]) {
+    schedule[index].enabled = !schedule[index].enabled;
+    renderSchedule(schedule);
+  }
+}
+
 // -------------------- RENDER JADWAL --------------------
 function renderSchedule(schedule) {
+  window.currentSchedule = schedule; // simpan global
   const tbody = document.getElementById("scheduleTable");
   tbody.innerHTML = "";
   const now = new Date();
   const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-  schedule.forEach(item => {
+  schedule.forEach((item, index) => {
     const itemSec = item.jam * 3600 + item.menit * 60 + item.detik;
     let status;
     if (itemSec < currentSec) {
@@ -171,10 +181,11 @@ function renderSchedule(schedule) {
     }
 
     const row = `<tr>
-      <td>${String(item.jam).padStart(2, "0")}:${String(item.menit).padStart(2, "0")}:${String(item.detik).padStart(2, "0")}</td>
+      <td>${String(item.jam).padStart(2,"0")}:${String(item.menit).padStart(2,"0")}:${String(item.detik).padStart(2,"0")}</td>
       <td>${item.keterangan}</td>
       <td>${status}</td>
       <td><button onclick="playAudio('${item.audio}')">Play</button></td>
+      <td><input type="checkbox" ${item.enabled ? "checked" : ""} onchange="toggleSchedule(${index})"></td>
     </tr>`;
     tbody.innerHTML += row;
   });
@@ -199,53 +210,12 @@ async function initSchedule() {
     const h = now.getHours();
     const m = now.getMinutes();
     const s = now.getSeconds();
-    schedule.forEach(item => {
-      if (item.jam === h && item.menit === m && item.detik === s) {
+    (window.currentSchedule || []).forEach(item => {
+      if (item.enabled && item.jam === h && item.menit === m && item.detik === s) {
         playAudio(item.audio);
       }
     });
   }, 1000);
 }
-
-//---------render enable------
-function renderSchedule(schedule) {
-  const tbody = document.getElementById("scheduleTable");
-  tbody.innerHTML = "";
-  const now = new Date();
-  const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-
-  schedule.forEach((item, index) => {
-    if (item.enabled === undefined) item.enabled = true; // default aktif
-
-    const itemSec = item.jam * 3600 + item.menit * 60 + item.detik;
-    let status;
-    if (itemSec < currentSec) {
-      const diff = Math.floor((currentSec - itemSec) / 60);
-      status = `Sudah lewat (${diff} menit lalu)`;
-    } else {
-      const diff = Math.floor((itemSec - currentSec) / 60);
-      status = `Kurang ${diff} menit lagi`;
-    }
-
-    const row = `<tr>
-      <td>${String(item.jam).padStart(2,"0")}:${String(item.menit).padStart(2,"0")}:${String(item.detik).padStart(2,"0")}</td>
-      <td>${item.keterangan}</td>
-      <td>${status}</td>
-      <td><button onclick="playAudio('${item.audio}')">Play</button></td>
-      <td><input type="checkbox" ${item.enabled ? "checked" : ""} onchange="toggleSchedule(${index})"></td>
-    </tr>`;
-    tbody.innerHTML += row;
-  });
-}
-
-function toggleSchedule(index) {
-  const schedule = loadScheduleOffline();
-  if (schedule[index]) {
-    schedule[index].enabled = !schedule[index].enabled;
-    localStorage.setItem("jadwal.csv", localStorage.getItem("jadwal.csv")); // tetap simpan CSV
-    renderSchedule(schedule);
-  }
-}
-
 
 initSchedule();
