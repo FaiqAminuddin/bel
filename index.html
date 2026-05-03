@@ -16,14 +16,6 @@
   <div id="clock"></div>
 
   <h2>Jadwal Bel</h2>
-  <button onclick="syncSchedule()">Sync Jadwal</button>
-  <button onclick="downloadSchedule()">Unduh Jadwal</button>
-<button onclick="downloadAllAudio()">Unduh Semua Audio</button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-  <h2>Audio</h2>
-<button onclick="syncAudio()">Sync Audio</button>
   <table>
     <thead>
       <tr>
@@ -37,6 +29,14 @@
   </table>
 
   <audio id="bell" controls hidden></audio>
+  
+    <button onclick="syncSchedule()">Sync Jadwal</button>
+  <button onclick="downloadSchedule()">Unduh Jadwal</button>
+<button onclick="downloadAllAudio()">Unduh Semua Audio</button>
+  <button onclick="syncAudio()">Sync Audio</button>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script src="script.js"></script>
   <script>
