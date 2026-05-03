@@ -1,10 +1,13 @@
-const CACHE_NAME = "bel-sekolah-cache-v1";
+const CACHE_NAME = "bel-sekolah-cache-v2";
 const URLS_TO_CACHE = [
-  "/",
   "/index.html",
   "/script.js",
+  "/jadwal.csv",
   "/manifest.json",
-  "/jadwal.csv"
+  "/audio/036.mp3",
+  "/audio/055.mp3",
+  "/audio/056.mp3",
+  "/audio/067.mp3"
 ];
 
 self.addEventListener("install", event => {
