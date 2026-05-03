@@ -57,12 +57,14 @@ function loadScheduleOffline() {
   return parseSchedule(text);
 }
 
+
 async function syncSchedule() {
   try {
     await fetchScheduleOnline();
-    setStatus("Jadwal berhasil disinkron");
+    setStatusPerButton("jadwal", "Jadwal berhasil disinkron");
   } catch (err) {
     alert("Gagal sync jadwal: " + err);
+    setStatusPerButton("jadwal", "Gagal sync jadwal", false);
   }
 }
 
@@ -70,6 +72,7 @@ function downloadSchedule() {
   const text = localStorage.getItem("jadwal.csv");
   if (!text) {
     alert("Belum ada jadwal tersimpan. Lakukan Sync dulu.");
+    setStatusPerButton("jadwal", "Unduh jadwal gagal", false);
     return;
   }
   const blob = new Blob([text], { type: "text/csv" });
@@ -79,10 +82,10 @@ function downloadSchedule() {
   a.download = "jadwal.csv";
   a.click();
   URL.revokeObjectURL(url);
-  setStatus("Jadwal berhasil diunduh");
+  setStatusPerButton("jadwal", "Jadwal berhasil diunduh");
 }
-
 // -------------------- AUDIO --------------------
+
 async function syncAudio() {
   try {
     for (const file of AUDIO_FILES) {
@@ -95,9 +98,10 @@ async function syncAudio() {
       };
       reader.readAsDataURL(blob);
     }
-    setStatus("Audio berhasil disinkron");
+    setStatusPerButton("audio", "Audio berhasil disinkron");
   } catch (err) {
     alert("Gagal sync audio: " + err);
+    setStatusPerButton("audio", "Gagal sync audio", false);
   }
 }
 
@@ -112,9 +116,8 @@ async function downloadAllAudio() {
   }
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, "audio_bel.zip");
-  setStatus("Semua audio berhasil diunduh");
+  setStatusPerButton("audio", "Semua audio berhasil diunduh");
 }
-
 // -------------------- PLAY --------------------
 function playAudio(src) {
   const bell = document.getElementById("bell");
@@ -188,5 +191,26 @@ async function initSchedule() {
     });
   }, 1000);
 }
+
+function setStatusPerButton(type, message, success=true) {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
+  const waktu = new Intl.DateTimeFormat('id-ID', options).format(now) + " WIB";
+
+  if (type === "jadwal") {
+    document.getElementById("statusJadwal").textContent = `${message} pada ${waktu}`;
+    if (success) {
+      document.getElementById("btnSyncJadwal").style.backgroundColor = "#4CAF50"; // hijau
+      document.getElementById("btnUnduhJadwal").style.backgroundColor = "#4CAF50";
+    }
+  } else if (type === "audio") {
+    document.getElementById("statusAudio").textContent = `${message} pada ${waktu}`;
+    if (success) {
+      document.getElementById("btnSyncAudio").style.backgroundColor = "#4CAF50";
+      document.getElementById("btnUnduhAudio").style.backgroundColor = "#4CAF50";
+    }
+  }
+}
+
 
 initSchedule();
