@@ -91,4 +91,47 @@ async function checkBell() {
   }, 1000);
 }
 
+// -------------------- Syns dan unduh auido --------------------
+
+const AUDIO_FILES = [
+  "audio/036.mp3",
+  "audio/055.mp3",
+  "audio/056.mp3",
+  "audio/067.mp3"
+];
+
+// -------------------- SYNC AUDIO --------------------
+async function syncAudio() {
+  try {
+    for (const file of AUDIO_FILES) {
+      const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      // simpan ke cache browser
+      const reader = new FileReader();
+      reader.onload = () => {
+        localStorage.setItem(file, reader.result); // base64
+      };
+      reader.readAsDataURL(blob);
+    }
+    alert("Audio berhasil disinkron dari GitHub.");
+  } catch (err) {
+    alert("Gagal sync audio: " + err);
+  }
+}
+
+// -------------------- UNDUH AUDIO --------------------
+function downloadAudio(file) {
+  const data = localStorage.getItem(file);
+  if (!data) {
+    alert("Audio belum tersimpan. Lakukan Sync dulu.");
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = data;
+  a.download = file.split("/").pop();
+  a.click();
+}
+
+
 checkBell();
