@@ -53,14 +53,17 @@ function parseSchedule(text) {
       detik: parseInt(detik),
       audio: audio.trim(),
       keterangan: keterangan,
-      enabled: true // default aktif
+      enabled: true
     };
   });
 }
 
 function loadScheduleOffline() {
   const text = localStorage.getItem("jadwal.csv");
-  if (!text) return [];
+  if (!text) {
+    // fallback: coba ambil file lokal jadwal.csv
+    return [];
+  }
   return parseSchedule(text);
 }
 
@@ -96,7 +99,7 @@ async function syncAudio() {
   try {
     for (const file of AUDIO_FILES) {
       const url = `https://raw.githubusercontent.com/FaiqAminuddin/bel/refs/heads/main/${file}`;
-      console.log("Mengambil:", url); // debug
+      console.log("Mengambil:", url);
       const response = await fetch(url);
       if (!response.ok) throw new Error("File tidak ditemukan: " + url);
       const blob = await response.blob();
@@ -143,7 +146,7 @@ function playAudio(src) {
   if (data) {
     bell.src = data;
   } else {
-    bell.src = src;
+    bell.src = src; // fallback ke file lokal relatif
   }
   bell.hidden = false;
   bell.play().catch(err => {
@@ -163,7 +166,7 @@ function toggleSchedule(index) {
 
 // -------------------- RENDER JADWAL --------------------
 function renderSchedule(schedule) {
-  window.currentSchedule = schedule; // simpan global
+  window.currentSchedule = schedule;
   const tbody = document.getElementById("scheduleTable");
   tbody.innerHTML = "";
   const now = new Date();
@@ -193,13 +196,16 @@ function renderSchedule(schedule) {
 
 // -------------------- INIT --------------------
 async function initSchedule() {
-  let schedule = [];
-  try {
-    schedule = await fetchScheduleOnline();
-    setStatusPerButton("jadwal", "Jadwal berhasil dimuat online");
-  } catch {
-    schedule = loadScheduleOffline();
+  let schedule = loadScheduleOffline();
+  if (schedule.length > 0) {
     setStatusPerButton("jadwal", "Jadwal dimuat dari offline cache");
+  } else {
+    try {
+      schedule = await fetchScheduleOnline();
+      setStatusPerButton("jadwal", "Jadwal berhasil dimuat online");
+    } catch {
+      setStatusPerButton("jadwal", "Tidak ada jadwal offline/online", false);
+    }
   }
   renderSchedule(schedule);
 
@@ -216,6 +222,3 @@ async function initSchedule() {
       }
     });
   }, 1000);
-}
-
-initSchedule();
