@@ -9,29 +9,36 @@
     #clock { font-size: 48px; margin-bottom: 20px; }
     table { border-collapse: collapse; margin:auto; }
     th, td { border:1px solid #ccc; padding:8px; }
+    button { margin:5px; padding:10px 15px; border:none; cursor:pointer; }
+    .btn-red { background-color:#f44336; color:white; }
+    .btn-green { background-color:#4CAF50; color:white; }
+    .status { margin:10px; font-weight:bold; color:green; }
+    #panel { border:1px solid #ccc; padding:20px; margin:20px; }
   </style>
 </head>
 <body>
   <h1>Jam WIB Terkini</h1>
   <div id="clock"></div>
+
+  <!-- Panel Manajemen Data -->
   <h2>Manajemen Data</h2>
-<div id="panel" style="border:1px solid #ccc; padding:20px; margin:20px;">
+  <div id="panel">
 
-  <!-- Jadwal -->
-  <h3>Jadwal</h3>
-  <button id="btnSyncJadwal" onclick="syncSchedule()" style="background-color:#f44336; color:white;">Sync Jadwal</button>
-  <button id="btnUnduhJadwal" onclick="downloadSchedule()" style="background-color:#f44336; color:white;">Unduh Jadwal</button>
-  <div id="statusJadwal" style="margin:10px; font-weight:bold; color:green;"></div>
+    <!-- Jadwal -->
+    <h3>Jadwal</h3>
+    <button id="btnSyncJadwal" class="btn-red" onclick="syncSchedule()">Sync Jadwal</button>
+    <button id="btnUnduhJadwal" class="btn-red" onclick="downloadSchedule()">Unduh Jadwal</button>
+    <div id="statusJadwal" class="status"></div>
 
-  <!-- Audio -->
-  <h3>Audio</h3>
-  <button id="btnSyncAudio" onclick="syncAudio()" style="background-color:#f44336; color:white;">Sync Audio</button>
-  <button id="btnUnduhAudio" onclick="downloadAllAudio()" style="background-color:#f44336; color:white;">Unduh Semua Audio</button>
-  <div id="statusAudio" style="margin:10px; font-weight:bold; color:green;"></div>
+    <!-- Audio -->
+    <h3>Audio</h3>
+    <button id="btnSyncAudio" class="btn-red" onclick="syncAudio()">Sync Audio</button>
+    <button id="btnUnduhAudio" class="btn-red" onclick="downloadAllAudio()">Unduh Semua Audio</button>
+    <div id="statusAudio" class="status"></div>
 
-</div>
+  </div>
 
-
+  <!-- Tabel Jadwal -->
   <h2>Jadwal Bel</h2>
   <table>
     <thead>
@@ -45,14 +52,17 @@
     <tbody id="scheduleTable"></tbody>
   </table>
 
+  <!-- Audio Player -->
   <audio id="bell" controls hidden></audio>
-  
 
-  
+  <!-- Library untuk ZIP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-<script src="script.js"></script>
+  <!-- Script utama -->
+  <script src="script.js"></script>
+
+  <!-- Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("service-worker.js")
