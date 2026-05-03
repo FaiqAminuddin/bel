@@ -207,4 +207,45 @@ async function initSchedule() {
   }, 1000);
 }
 
+//---------render enable------
+function renderSchedule(schedule) {
+  const tbody = document.getElementById("scheduleTable");
+  tbody.innerHTML = "";
+  const now = new Date();
+  const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+  schedule.forEach((item, index) => {
+    if (item.enabled === undefined) item.enabled = true; // default aktif
+
+    const itemSec = item.jam * 3600 + item.menit * 60 + item.detik;
+    let status;
+    if (itemSec < currentSec) {
+      const diff = Math.floor((currentSec - itemSec) / 60);
+      status = `Sudah lewat (${diff} menit lalu)`;
+    } else {
+      const diff = Math.floor((itemSec - currentSec) / 60);
+      status = `Kurang ${diff} menit lagi`;
+    }
+
+    const row = `<tr>
+      <td>${String(item.jam).padStart(2,"0")}:${String(item.menit).padStart(2,"0")}:${String(item.detik).padStart(2,"0")}</td>
+      <td>${item.keterangan}</td>
+      <td>${status}</td>
+      <td><button onclick="playAudio('${item.audio}')">Play</button></td>
+      <td><input type="checkbox" ${item.enabled ? "checked" : ""} onchange="toggleSchedule(${index})"></td>
+    </tr>`;
+    tbody.innerHTML += row;
+  });
+}
+
+function toggleSchedule(index) {
+  const schedule = loadScheduleOffline();
+  if (schedule[index]) {
+    schedule[index].enabled = !schedule[index].enabled;
+    localStorage.setItem("jadwal.csv", localStorage.getItem("jadwal.csv")); // tetap simpan CSV
+    renderSchedule(schedule);
+  }
+}
+
+
 initSchedule();
