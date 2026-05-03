@@ -1,7 +1,7 @@
 {
   "name": "Bel Sekolah Online",
   "short_name": "BelSekolah",
-  "start_url": ".",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
